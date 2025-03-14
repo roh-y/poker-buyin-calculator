@@ -105,9 +105,10 @@ table {
     width: 100%;
     border-collapse: collapse;
     margin: 20px 0;
-    background: #fff;
+    background: #fff; /* Ensure table background is white */
     border-radius: 10px;
     overflow: hidden;
+    color: #333; /* Default text color for table content */
 }
 
 th, td {
@@ -118,7 +119,11 @@ th, td {
 
 th {
     background: linear-gradient(45deg, #3498db, #2980b9);
-    color: #fff;
+    color: #fff; /* White text for headers */
+}
+
+td {
+    color: #333; /* Dark gray text for cells, overrides body color */
 }
 
 #history {
@@ -159,11 +164,13 @@ th {
 
 .suspicious {
     background: #ffccbc;
+    color: #333; /* Ensure text is readable */
 }
 
 .donga {
-    background: #f1c40f; /* Yellow to make DONGA stand out */
+    background: #f1c40f; /* Yellow for DONGA */
     font-weight: bold;
+    color: #333; /* Dark text for contrast */
 }
 
 @keyframes slideIn {
