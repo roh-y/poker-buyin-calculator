@@ -109,7 +109,8 @@ function calculateResults() {
 
     const totalChipsCashedIn = playerData.reduce((sum, p) => sum + p.chips, 0);
     const chipValue = totalPool / (totalChipsCashedIn || 1);
-    
+    const chipDifference = totalChipsCashedIn - totalChipsDistributed;
+
     let resultsHTML = `
         <table>
             <tr>
@@ -124,8 +125,8 @@ function calculateResults() {
     if (totalChipsCashedIn !== totalChipsDistributed) {
         playerData.forEach(player => {
             const expectedChips = player.buyIns * CHIPS_PER_BUYIN;
-            const chipDifference = Math.abs(player.chips - expectedChips);
-            if (chipDifference > totalChipsDistributed * 0.2) {
+            const chipDiff = Math.abs(player.chips - expectedChips);
+            if (chipDiff > totalChipsDistributed * 0.2) {
                 suspiciousPlayers.push(player.name);
             }
         });
@@ -147,6 +148,19 @@ function calculateResults() {
         `;
     });
 
+    // Add "DONGA" if there's a chip difference
+    if (totalChipsCashedIn !== totalChipsDistributed) {
+        const dongaAmount = chipDifference * chipValue;
+        resultsHTML += `
+            <tr class="donga">
+                <td>DONGA (Difference)</td>
+                <td>0</td>
+                <td>${chipDifference > 0 ? '+' : ''}${chipDifference}</td>
+                <td>$${dongaAmount.toFixed(2)}</td>
+            </tr>
+        `;
+    }
+
     resultsHTML += '</table>';
 
     if (totalChipsCashedIn !== totalChipsDistributed) {
@@ -154,8 +168,15 @@ function calculateResults() {
             <div class="warning">
                 ⚠️ Chip count mismatch! 
                 Distributed: ${totalChipsDistributed} chips, 
-                Cashed in: ${totalChipsCashedIn} chips.
+                Cashed in: ${totalChipsCashedIn} chips,
+                Difference: ${chipDifference > 0 ? '+' : ''}${chipDifference} chips.
                 ${suspiciousPlayers.length > 0 ? 'Possible errors from: ' + suspiciousPlayers.join(', ') : 'Check all counts.'}
+            </div>
+        ` + resultsHTML;
+    } else {
+        resultsHTML = `
+            <div class="info">
+                ✅ Chips match! Distributed and cashed in: ${totalChipsDistributed} chips.
             </div>
         ` + resultsHTML;
     }
@@ -173,7 +194,7 @@ function calculateResults() {
         totalChipsCashedIn: totalChipsCashedIn
     });
 
-    localStorage.removeItem(CURRENT_GAME_KEY); // Clear current game after ending
+    localStorage.removeItem(CURRENT_GAME_KEY);
     loadHistory();
 }
 
@@ -213,12 +234,13 @@ function showGameDetails(game) {
     `;
     
     const chipValue = game.totalPool / (game.totalChipsCashedIn || 1);
+    const chipDifference = game.totalChipsCashedIn - game.totalChipsDistributed;
     let suspiciousPlayers = [];
     if (game.totalChipsCashedIn !== game.totalChipsDistributed) {
         game.players.forEach(player => {
             const expectedChips = player.buyIns * CHIPS_PER_BUYIN;
-            const chipDifference = Math.abs(player.chips - expectedChips);
-            if (chipDifference > game.totalChipsDistributed * 0.2) {
+            const chipDiff = Math.abs(player.chips - expectedChips);
+            if (chipDiff > game.totalChipsDistributed * 0.2) {
                 suspiciousPlayers.push(player.name);
             }
         });
@@ -239,6 +261,20 @@ function showGameDetails(game) {
             </tr>
         `;
     });
+
+    // Add "DONGA" if there's a chip difference
+    if (game.totalChipsCashedIn !== game.totalChipsDistributed) {
+        const dongaAmount = chipDifference * chipValue;
+        details += `
+            <tr class="donga">
+                <td>DONGA (Difference)</td>
+                <td>0</td>
+                <td>${chipDifference > 0 ? '+' : ''}${chipDifference}</td>
+                <td>$${dongaAmount.toFixed(2)}</td>
+            </tr>
+        `;
+    }
+
     details += '</table>';
 
     if (game.totalChipsCashedIn !== game.totalChipsDistributed) {
@@ -246,8 +282,15 @@ function showGameDetails(game) {
             <div class="warning">
                 ⚠️ Chip count mismatch! 
                 Distributed: ${game.totalChipsDistributed} chips, 
-                Cashed in: ${game.totalChipsCashedIn} chips.
+                Cashed in: ${game.totalChipsCashedIn} chips,
+                Difference: ${chipDifference > 0 ? '+' : ''}${chipDifference} chips.
                 ${suspiciousPlayers.length > 0 ? 'Possible errors from: ' + suspiciousPlayers.join(', ') : 'Check all counts.'}
+            </div>
+        ` + details;
+    } else {
+        details = `
+            <div class="info">
+                ✅ Chips match! Distributed and cashed in: ${game.totalChipsDistributed} chips.
             </div>
         ` + details;
     }
