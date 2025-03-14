@@ -1,5 +1,6 @@
 let playerData = [];
 const STORAGE_KEY = 'pokerGameHistory';
+const CHIPS_PER_BUYIN = 200;
 
 function startGame() {
     const numPlayers = parseInt(document.getElementById('players').value);
@@ -16,7 +17,7 @@ function startGame() {
         playerData.push({
             name: `Player ${i}`,
             buyIns: 1,
-            chips: 200
+            chips: 0
         });
 
         const div = document.createElement('div');
@@ -66,11 +67,14 @@ function updateChips(index, chips) {
 
 function calculateResults() {
     let totalPool = 0;
+    let totalChipsDistributed = 0;
     playerData.forEach(player => {
         totalPool += player.buyIns * 5;
+        totalChipsDistributed += player.buyIns * CHIPS_PER_BUYIN;
     });
 
-    const chipValue = totalPool / (playerData.reduce((sum, p) => sum + p.chips, 0) || 1);
+    const totalChipsCashedIn = playerData.reduce((sum, p) => sum + p.chips, 0);
+    const chipValue = totalPool / (totalChipsCashedIn || 1);
     
     let resultsHTML = `
         <table>
@@ -82,13 +86,25 @@ function calculateResults() {
             </tr>
     `;
 
+    let suspiciousPlayers = [];
+    if (totalChipsCashedIn !== totalChipsDistributed) {
+        playerData.forEach(player => {
+            const expectedChips = player.buyIns * CHIPS_PER_BUYIN;
+            const chipDifference = Math.abs(player.chips - expectedChips);
+            if (chipDifference > totalChipsDistributed * 0.2) {
+                suspiciousPlayers.push(player.name);
+            }
+        });
+    }
+
     playerData.forEach(player => {
         const amountWon = player.chips * chipValue;
         const amountPaid = player.buyIns * 5;
         const difference = amountWon - amountPaid;
+        const isSuspicious = suspiciousPlayers.includes(player.name);
         
         resultsHTML += `
-            <tr>
+            <tr ${isSuspicious ? 'class="suspicious"' : ''}>
                 <td>${player.name}</td>
                 <td>${player.buyIns}</td>
                 <td>${player.chips}</td>
@@ -99,6 +115,17 @@ function calculateResults() {
 
     resultsHTML += '</table>';
 
+    if (totalChipsCashedIn !== totalChipsDistributed) {
+        resultsHTML = `
+            <div class="warning">
+                ⚠️ Chip count mismatch! 
+                Distributed: ${totalChipsDistributed} chips, 
+                Cashed in: ${totalChipsCashedIn} chips.
+                ${suspiciousPlayers.length > 0 ? 'Possible errors from: ' + suspiciousPlayers.join(', ') : 'Check all counts.'}
+            </div>
+        ` + resultsHTML;
+    }
+
     document.getElementById('resultsTable').innerHTML = resultsHTML;
     document.getElementById('totalPool').textContent = totalPool.toFixed(2);
     document.getElementById('results').classList.remove('hidden');
@@ -107,7 +134,9 @@ function calculateResults() {
     saveGameToHistory({
         date: new Date().toLocaleString(),
         players: [...playerData],
-        totalPool: totalPool
+        totalPool: totalPool,
+        totalChipsDistributed: totalChipsDistributed,
+        totalChipsCashedIn: totalChipsCashedIn
     });
 
     loadHistory();
@@ -131,7 +160,8 @@ function loadHistory() {
             <strong>Game ${index + 1}</strong> - ${game.date} 
             (Players: ${game.players.length}, Pool: $${game.totalPool.toFixed(2)})
         `;
-        div.onclick = () => showGameDetails(game);
+        div.addEventListener('touchstart', () => showGameDetails(game)); // Touch support
+        div.addEventListener('click', () => showGameDetails(game)); // Mouse support
         historyList.appendChild(div);
     });
 }
@@ -147,14 +177,26 @@ function showGameDetails(game) {
             </tr>
     `;
     
-    const chipValue = game.totalPool / (game.players.reduce((sum, p) => sum + p.chips, 0) || 1);
+    const chipValue = game.totalPool / (game.totalChipsCashedIn || 1);
+    let suspiciousPlayers = [];
+    if (game.totalChipsCashedIn !== game.totalChipsDistributed) {
+        game.players.forEach(player => {
+            const expectedChips = player.buyIns * CHIPS_PER_BUYIN;
+            const chipDifference = Math.abs(player.chips - expectedChips);
+            if (chipDifference > game.totalChipsDistributed * 0.2) {
+                suspiciousPlayers.push(player.name);
+            }
+        });
+    }
+
     game.players.forEach(player => {
         const amountWon = player.chips * chipValue;
         const amountPaid = player.buyIns * 5;
         const difference = amountWon - amountPaid;
+        const isSuspicious = suspiciousPlayers.includes(player.name);
         
         details += `
-            <tr>
+            <tr ${isSuspicious ? 'class="suspicious"' : ''}>
                 <td>${player.name}</td>
                 <td>${player.buyIns}</td>
                 <td>${player.chips}</td>
@@ -163,6 +205,17 @@ function showGameDetails(game) {
         `;
     });
     details += '</table>';
+
+    if (game.totalChipsCashedIn !== game.totalChipsDistributed) {
+        details = `
+            <div class="warning">
+                ⚠️ Chip count mismatch! 
+                Distributed: ${game.totalChipsDistributed} chips, 
+                Cashed in: ${game.totalChipsCashedIn} chips.
+                ${suspiciousPlayers.length > 0 ? 'Possible errors from: ' + suspiciousPlayers.join(', ') : 'Check all counts.'}
+            </div>
+        ` + details;
+    }
 
     document.getElementById('resultsTable').innerHTML = details;
     document.getElementById('totalPool').textContent = game.totalPool.toFixed(2);
