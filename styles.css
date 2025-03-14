@@ -84,6 +84,10 @@ input {
     background: linear-gradient(45deg, #2ecc71, #27ae60);
 }
 
+.fancy-button.save {
+    background: linear-gradient(45deg, #3498db, #2980b9);
+}
+
 .hidden {
     display: none;
 }
