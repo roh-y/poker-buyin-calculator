@@ -15,6 +15,7 @@ body {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     max-width: 600px;
     margin: 0 auto;
+    color: #333; /* Default text color inside container */
 }
 
 h1 {
@@ -105,10 +106,10 @@ table {
     width: 100%;
     border-collapse: collapse;
     margin: 20px 0;
-    background: #fff; /* Ensure table background is white */
+    background: #fff;
     border-radius: 10px;
     overflow: hidden;
-    color: #333; /* Default text color for table content */
+    color: #333; /* Default text color for table */
 }
 
 th, td {
@@ -123,7 +124,14 @@ th {
 }
 
 td {
-    color: #333; /* Dark gray text for cells, overrides body color */
+    color: #333; /* Dark gray text for cells */
+}
+
+#results p {
+    color: #333; /* Explicitly set Total Pool text color */
+    font-weight: bold;
+    font-size: 1.2em;
+    margin: 10px 0;
 }
 
 #history {
@@ -164,13 +172,13 @@ td {
 
 .suspicious {
     background: #ffccbc;
-    color: #333; /* Ensure text is readable */
+    color: #333;
 }
 
 .donga {
-    background: #f1c40f; /* Yellow for DONGA */
+    background: #f1c40f;
     font-weight: bold;
-    color: #333; /* Dark text for contrast */
+    color: #333;
 }
 
 @keyframes slideIn {
