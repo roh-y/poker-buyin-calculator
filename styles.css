@@ -64,6 +64,7 @@ input {
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    margin: 10px 0;
 }
 
 .fancy-button:hover {
@@ -77,6 +78,10 @@ input {
 
 .fancy-button.clear {
     background: linear-gradient(45deg, #e74c3c, #c0392b);
+}
+
+.fancy-button.add {
+    background: linear-gradient(45deg, #2ecc71, #27ae60);
 }
 
 .hidden {
@@ -154,7 +159,6 @@ th {
     }
 }
 
-/* Mobile-specific adjustments */
 @media (max-width: 600px) {
     body {
         padding: 10px;
