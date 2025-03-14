@@ -33,6 +33,24 @@ function startGame() {
     document.getElementById('results').classList.add('hidden');
 }
 
+function addPlayer() {
+    const playerInputs = document.getElementById('playerInputs');
+    const newPlayerIndex = playerData.length;
+    playerData.push({
+        name: `Player ${newPlayerIndex + 1}`,
+        buyIns: 1,
+        chips: 0
+    });
+
+    const div = document.createElement('div');
+    div.className = 'player-row';
+    div.innerHTML = `
+        <label>Name: <input type="text" value="Player ${newPlayerIndex + 1}" onchange="updateName(${newPlayerIndex}, this.value)"></label>
+        <label>Buy-ins: <input type="number" min="1" value="1" onchange="updateBuyIns(${newPlayerIndex}, this.value)"></label>
+    `;
+    playerInputs.appendChild(div);
+}
+
 function updateName(index, name) {
     playerData[index].name = name;
 }
@@ -56,9 +74,12 @@ function endGame() {
         playerInputs.appendChild(div);
     });
 
-    const endButton = document.querySelector('#gameArea button');
+    const endButton = document.querySelector('#gameArea button:last-child'); // Target "End Game" button
     endButton.textContent = 'Calculate Results';
     endButton.onclick = calculateResults;
+    
+    // Hide "Add Player" button when ending game
+    document.querySelector('#gameArea button.add').classList.add('hidden');
 }
 
 function updateChips(index, chips) {
@@ -160,8 +181,8 @@ function loadHistory() {
             <strong>Game ${index + 1}</strong> - ${game.date} 
             (Players: ${game.players.length}, Pool: $${game.totalPool.toFixed(2)})
         `;
-        div.addEventListener('touchstart', () => showGameDetails(game)); // Touch support
-        div.addEventListener('click', () => showGameDetails(game)); // Mouse support
+        div.addEventListener('touchstart', () => showGameDetails(game));
+        div.addEventListener('click', () => showGameDetails(game));
         historyList.appendChild(div);
     });
 }
