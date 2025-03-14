@@ -1,33 +1,41 @@
 let playerData = [];
 const STORAGE_KEY = 'pokerGameHistory';
+const CURRENT_GAME_KEY = 'currentPokerGame';
 const CHIPS_PER_BUYIN = 200;
 
 function startGame() {
-    const numPlayers = parseInt(document.getElementById('players').value);
-    if (numPlayers < 8 || numPlayers > 12) {
-        alert('Please enter a number between 8 and 12');
-        return;
+    const numPlayersInput = parseInt(document.getElementById('players').value);
+    const savedGame = JSON.parse(localStorage.getItem(CURRENT_GAME_KEY));
+
+    if (savedGame && confirm('Resume saved game?')) {
+        playerData = savedGame;
+    } else {
+        if (numPlayersInput < 8 || numPlayersInput > 12) {
+            alert('Please enter a number between 8 and 12');
+            return;
+        }
+        playerData = [];
+        for (let i = 1; i <= numPlayersInput; i++) {
+            playerData.push({
+                name: `Player ${i}`,
+                buyIns: 1,
+                chips: 0
+            });
+        }
     }
 
-    playerData = [];
     const playerInputs = document.getElementById('playerInputs');
     playerInputs.innerHTML = '';
 
-    for (let i = 1; i <= numPlayers; i++) {
-        playerData.push({
-            name: `Player ${i}`,
-            buyIns: 1,
-            chips: 0
-        });
-
+    playerData.forEach((player, index) => {
         const div = document.createElement('div');
         div.className = 'player-row';
         div.innerHTML = `
-            <label>Name: <input type="text" value="Player ${i}" onchange="updateName(${i-1}, this.value)"></label>
-            <label>Buy-ins: <input type="number" min="1" value="1" onchange="updateBuyIns(${i-1}, this.value)"></label>
+            <label>Name: <input type="text" value="${player.name}" onchange="updateName(${index}, this.value)"></label>
+            <label>Buy-ins: <input type="number" min="1" value="${player.buyIns}" onchange="updateBuyIns(${index}, this.value)"></label>
         `;
         playerInputs.appendChild(div);
-    }
+    });
 
     document.getElementById('gameArea').classList.remove('hidden');
     document.getElementById('results').classList.add('hidden');
@@ -59,6 +67,11 @@ function updateBuyIns(index, buyIns) {
     playerData[index].buyIns = parseInt(buyIns);
 }
 
+function saveGame() {
+    localStorage.setItem(CURRENT_GAME_KEY, JSON.stringify(playerData));
+    alert('Game progress saved!');
+}
+
 function endGame() {
     const playerInputs = document.getElementById('playerInputs');
     playerInputs.innerHTML = '';
@@ -74,11 +87,11 @@ function endGame() {
         playerInputs.appendChild(div);
     });
 
-    const endButton = document.querySelector('#gameArea button:last-child'); // Target "End Game" button
+    const endButton = document.querySelector('#gameArea button:last-child');
     endButton.textContent = 'Calculate Results';
     endButton.onclick = calculateResults;
     
-    // Hide "Add Player" button when ending game
+    document.querySelector('#gameArea button.save').classList.add('hidden');
     document.querySelector('#gameArea button.add').classList.add('hidden');
 }
 
@@ -160,6 +173,7 @@ function calculateResults() {
         totalChipsCashedIn: totalChipsCashedIn
     });
 
+    localStorage.removeItem(CURRENT_GAME_KEY); // Clear current game after ending
     loadHistory();
 }
 
