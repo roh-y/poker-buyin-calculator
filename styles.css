@@ -148,8 +148,22 @@ th {
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
 }
 
+.info {
+    background: rgba(46, 204, 113, 0.9);
+    padding: 15px;
+    border-radius: 10px;
+    margin: 15px 0;
+    color: #fff;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
 .suspicious {
     background: #ffccbc;
+}
+
+.donga {
+    background: #f1c40f; /* Yellow to make DONGA stand out */
+    font-weight: bold;
 }
 
 @keyframes slideIn {
